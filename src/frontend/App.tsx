@@ -10,7 +10,7 @@ export function App() {
     return (
       <div className="invalid">
         <div>
-          <h1>LiveClip</h1>
+          <h1>LIVECLIP</h1>
           <p>链接无效。房间 ID 必须是 22 位随机标识。</p>
           <a href="/">创建新文档</a>
         </div>

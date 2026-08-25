@@ -12,4 +12,5 @@ playwright/.cache/
 .DS_Store
 coverage/
 .vite/
+.github/token.json
 *.tsbuildinfo

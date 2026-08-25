@@ -31,16 +31,16 @@ function turnstilePage(siteKey: string): string {
     <title>LiveClip</title>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <style>
-      body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #f6f7f8; color: #111; }
-      main { max-width: 28rem; margin: 20vh auto; padding: 1.5rem; background: #fff; border: 1px solid #e5e7eb; }
-      h1 { font-size: 1.1rem; margin: 0 0 0.75rem; }
-      p { font-size: 0.9rem; color: #4b5563; }
-      button { margin-top: 1rem; padding: 0.45rem 0.8rem; }
+      body { font-family: ui-sans-serif, system-ui, sans-serif; margin: 0; background: #d8d5ce; color: #161615; }
+      main { max-width: 28rem; margin: 20vh auto; padding: 1.5rem; background: #e8e6df; border: 1px solid #9e9a90; }
+      h1 { font-size: 0.9rem; margin: 0 0 0.75rem; letter-spacing: 0.16em; font-family: ui-monospace, monospace; }
+      p { font-size: 0.9rem; color: #3a3936; }
+      button { margin-top: 1rem; padding: 0.5rem 0.8rem; background: #8d5a2b; color: #f0eee8; border: 1px solid #8d5a2b; }
     </style>
   </head>
   <body>
     <main>
-      <h1>LiveClip</h1>
+      <h1>LIVECLIP</h1>
       <p>验证后创建新的实时文档。</p>
       <form id="form">
         <div class="cf-turnstile" data-sitekey="${escaped}"></div>

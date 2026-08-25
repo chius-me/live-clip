@@ -6,3 +6,5 @@ playwright-report
 blob-report
 worker-configuration.d.ts
 package-lock.json
+LICENSE
+*.svg

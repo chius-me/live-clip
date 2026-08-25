@@ -25,14 +25,14 @@ const ANIMALS = [
 ];
 
 const COLORS = [
-  "#c2410c",
-  "#a16207",
-  "#4d7c0f",
-  "#0f766e",
-  "#1d4ed8",
-  "#6d28d9",
-  "#be185d",
-  "#b45309",
+  "#8d5a2b",
+  "#5c4a32",
+  "#3f5c38",
+  "#6a4e3a",
+  "#8c2f2f",
+  "#4a5c6a",
+  "#7a6238",
+  "#3a3936",
 ];
 
 export type UserIdentity = {

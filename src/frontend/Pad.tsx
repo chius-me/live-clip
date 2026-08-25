@@ -15,6 +15,7 @@ import {
 import { copyText, downloadText } from "./clipboard";
 import { installRemoteCursorStyles } from "./cursors";
 import { getOrCreateIdentity } from "./identity";
+import { monacoThemeName, registerClipThemes } from "./monaco-theme";
 import { LiveClipProvider, type ConnectionStatus } from "./provider";
 import { resolveEditSecret } from "./secret";
 
@@ -163,6 +164,8 @@ export function Pad({ roomId }: { roomId: string }) {
   const onMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
+    registerClipThemes(monaco);
+    monaco.editor.setTheme(monacoThemeName(theme));
     const model = editor.getModel();
     if (model) {
       monaco.editor.setModelLanguage(model, language);
@@ -170,6 +173,10 @@ export function Pad({ roomId }: { roomId: string }) {
     editor.updateOptions({ readOnly: role !== "editor", domReadOnly: role !== "editor" });
     bindEditor();
   };
+
+  useEffect(() => {
+    monacoRef.current?.editor.setTheme(monacoThemeName(theme));
+  }, [theme]);
 
   const canEdit = role === "editor";
 
@@ -222,7 +229,7 @@ export function Pad({ roomId }: { roomId: string }) {
       <header className={`toolbar${menuOpen ? " open" : ""}`}>
         <div className="brand">
           <a className="logo" href="/" title="新建文档">
-            LiveClip
+            LIVECLIP
           </a>
           <span className={`status status-${status}`} data-testid="status">
             {STATUS_LABEL[status]}
@@ -296,7 +303,7 @@ export function Pad({ roomId }: { roomId: string }) {
       </header>
       <div className="editor-wrap" data-testid="editor">
         <Editor
-          theme={theme === "dark" ? "vs-dark" : "vs"}
+          theme={monacoThemeName(theme)}
           defaultLanguage={DEFAULT_LANGUAGE}
           defaultValue=""
           onMount={onMount}
