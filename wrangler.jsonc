@@ -2,6 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "liveclip",
   "main": "src/worker/index.ts",
+  "workers_dev": true,
   // Capped to the newest date bundled with @cloudflare/vitest-pool-workers 0.16.x (workerd 2026-07-02).
   "compatibility_date": "2026-07-02",
   "compatibility_flags": ["nodejs_compat"],
@@ -25,6 +26,7 @@
       "new_sqlite_classes": ["Room"],
     },
   ],
+  "routes": [{ "pattern": "liveclip.chius.cc", "custom_domain": true }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,
