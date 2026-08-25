@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "liveclip",
+  "main": "src/worker/index.ts",
+  // Capped to the newest date bundled with @cloudflare/vitest-pool-workers 0.16.x (workerd 2026-07-02).
+  "compatibility_date": "2026-07-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/", "/health", "/api/*"],
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ROOMS",
+        "class_name": "Room",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["Room"],
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "vars": {
+    "ENVIRONMENT": "development",
+    "RETENTION_DAYS": "30",
+    "MAX_DOCUMENT_BYTES": "1048576",
+    "MAX_MESSAGE_BYTES": "65536",
+    "MAX_CONNECTIONS": "50",
+    "COMPACT_UPDATE_COUNT": "100",
+    "COMPACT_UPDATE_BYTES": "131072",
+    "RATE_LIMIT_MESSAGES": "40",
+    "RATE_LIMIT_WINDOW_MS": "1000",
+    "ALLOWED_ORIGINS": "",
+    "TURNSTILE_SITE_KEY": "",
+  },
+}

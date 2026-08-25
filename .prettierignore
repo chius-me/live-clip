@@ -1,0 +1,8 @@
+dist
+.wrangler
+node_modules
+test-results
+playwright-report
+blob-report
+worker-configuration.d.ts
+package-lock.json
