@@ -6,7 +6,7 @@
 
 运行在 Cloudflare Workers 上的实时协作剪切板。
 
-[![Release](https://img.shields.io/github/v/release/chius-me/liveclip?logo=github)](https://github.com/chius-me/liveclip/releases/latest)
+[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?logo=github)](https://github.com/chius-me/live-clip/releases/latest)
 [![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
