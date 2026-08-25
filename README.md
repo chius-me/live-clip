@@ -1,29 +1,42 @@
+<div align="right"><a href="#liveclip">English</a> | <a href="./README.zh.md">简体中文</a></div>
+
+<div align="center">
+
 # LiveClip
 
-打开同一个链接，多台设备同时编辑纯文本或代码。修改用 Yjs CRDT 实时同步，不会互相覆盖。
+Realtime collaborative clipboard on Cloudflare Workers.
 
-线上：https://liveclip.chius.cc
+[![Release](https://img.shields.io/github/v/release/chius-me/liveclip?logo=github)](https://github.com/chius-me/liveclip/releases/latest)
+[![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
 
-适合「打开就能写」。保存后再分享请用 [Clip](https://clip.chius.cc/)。
+</div>
 
-![LiveClip 编辑器](docs/screenshot.png)
+Open the same link on a computer and a phone, then edit plain text or code together. Updates sync with Yjs CRDT, so concurrent typing converges instead of overwriting.
 
-## 链接
+Live site: https://liveclip.chius.cc
 
-| 类型 | 形式                       | 权限                                |
-| ---- | -------------------------- | ----------------------------------- |
-| 只读 | `/p/{roomId}`              | 同步内容，不能写入                  |
-| 编辑 | `/p/{roomId}#{editSecret}` | fragment 里的密钥即可编辑，无需注册 |
+For save-then-share, use [Clip](https://clip.chius.cc/).
 
-服务端只存密钥的 SHA-256。文档在最后一次编辑后 30 天自动删除。
+![LiveClip editor](docs/screenshot.png)
 
-## 架构
+## Links
 
-Cloudflare Worker 同时提供静态页、API 和 WebSocket。每个文档一个 Durable Object，SQLite 持久化 Yjs 快照与增量，WebSocket 使用 Hibernation API。不依赖 VPS、Redis、D1、KV 或 R2。
+| Kind      | URL                        | Access                                                        |
+| --------- | -------------------------- | ------------------------------------------------------------- |
+| Read-only | `/p/{roomId}`              | Sync content, cannot write                                    |
+| Edit      | `/p/{roomId}#{editSecret}` | Anyone with the fragment secret can edit. No account required |
 
-## 本地开发
+The server stores only a SHA-256 of the edit secret. Documents are deleted 30 days after the last edit.
 
-需要 Node.js 20+。
+## Architecture
+
+One Cloudflare Worker serves the SPA, HTTP API, and WebSocket upgrade. Each document is its own Durable Object. SQLite stores the Yjs snapshot plus incremental updates. WebSockets use the Hibernation API. No VPS, Redis, D1, KV, or R2.
+
+## Local development
+
+Node.js 20+ is required.
 
 ```bash
 npm install
@@ -31,28 +44,28 @@ npm run dev          # http://localhost:5173
 npm run typecheck
 npm run lint
 npm test
-npm run test:e2e     # 首次需 npx playwright install chromium
+npm run test:e2e     # first run: npx playwright install chromium
 ```
 
-不要用 `file://` 打开构建产物。
+Do not open the built HTML via `file://`.
 
-## 部署
+## Deploy
 
-推送到 `main` 会通过 GitHub Actions 部署到 Cloudflare。也可本地执行：
+Pushes to `main` deploy through GitHub Actions. Locally:
 
 ```bash
 npx wrangler login
 npm run deploy
 ```
 
-仓库 Secrets：`CLOUDFLARE_API_TOKEN`（Cloudflare API Token，权限用 Edit Cloudflare Workers）、`CLOUDFLARE_ACCOUNT_ID`。自定义域已绑 `liveclip.chius.cc`。
+Repo secrets: `CLOUDFLARE_API_TOKEN` (Edit Cloudflare Workers) and `CLOUDFLARE_ACCOUNT_ID`. The custom domain `liveclip.chius.cc` is already bound.
 
-可选 Turnstile：`wrangler secret put TURNSTILE_SECRET`，并设置 `TURNSTILE_SITE_KEY`。未配置时创建房间不验证。
+Optional Turnstile: `wrangler secret put TURNSTILE_SECRET` and set `TURNSTILE_SITE_KEY`. Room creation skips Turnstile when it is unset.
 
-## 限制
+## Limits
 
-纯文本 / 代码，无账号与历史。单文档默认 1 MiB，单房间 50 连接。知道编辑链接的人都能写。Durable Objects 按用量计费。
+Plain text and code only. No accounts or history. Default cap is 1 MiB per document and 50 connections per room. Anyone with the edit link can write. Durable Objects are billed by usage.
 
-## 许可
+## License
 
-[GPL-3.0](LICENSE)。界面参考了 [Rustpad](https://github.com/ekzhang/rustpad) 的交互，未复制其服务端代码。
+[GPL-3.0](LICENSE). The UI is inspired by [Rustpad](https://github.com/ekzhang/rustpad); none of its server code is copied.
