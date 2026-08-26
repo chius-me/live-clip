@@ -1,6 +1,8 @@
 import { Awareness } from "y-protocols/awareness";
 import * as Y from "yjs";
 import type { ConnectionRole } from "../shared/protocol";
+import { SYNC_STEP2 } from "../shared/protocol";
+import { applyRemoteYjsUpdate, shouldSendYjsUpdate } from "../shared/y-origin";
 import {
   applyAwarenessUpdate,
   encodeAwarenessFrom,
@@ -41,6 +43,7 @@ export class LiveClipProvider {
   private attempt = 0;
   private reconnectTimer: number | null = null;
   private synced = false;
+  private pendingUpdates: Uint8Array[] = [];
   private readonly onDocUpdate: (update: Uint8Array, origin: unknown) => void;
   private readonly onAwarenessChange: (
     changes: { added: number[]; updated: number[]; removed: number[] },
@@ -57,12 +60,11 @@ export class LiveClipProvider {
     this.onOnline = options.onOnline;
     this.onToast = options.onToast;
     this.onDocUpdate = (update, origin) => {
-      if (
-        origin === "remote" ||
-        origin === "storage" ||
-        !this.ws ||
-        this.ws.readyState !== WebSocket.OPEN
-      ) {
+      if (!shouldSendYjsUpdate(origin, !this.destroyed)) {
+        return;
+      }
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.synced) {
+        this.enqueuePending(update);
         return;
       }
       this.ws.send(toSendBuffer(encodeSyncUpdate(update)));
@@ -83,38 +85,58 @@ export class LiveClipProvider {
   destroy(): void {
     this.destroyed = true;
     this.shouldReconnect = false;
+    this.pendingUpdates = [];
     if (this.reconnectTimer != null) {
       window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
     this.doc.off("update", this.onDocUpdate);
     this.awareness.off("update", this.onAwarenessChange);
     this.awareness.setLocalState(null);
-    this.ws?.close(1000, "client destroy");
+    const ws = this.ws;
     this.ws = null;
+    this.synced = false;
+    try {
+      ws?.close(1000, "client destroy");
+    } catch {
+      // already closed
+    }
   }
 
   private connect(): void {
     if (this.destroyed) {
       return;
     }
+    if (this.reconnectTimer != null) {
+      window.clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.dropSocket();
     this.onStatus(this.attempt === 0 ? "connecting" : "reconnecting");
     const ws = new WebSocket(this.url);
     ws.binaryType = "arraybuffer";
     this.ws = ws;
     ws.onopen = () => {
+      if (this.destroyed || this.ws !== ws) {
+        return;
+      }
       ws.send(JSON.stringify({ type: "auth", editSecret: this.editSecret }));
     };
     ws.onmessage = (event) => {
-      if (typeof event.data === "string") {
-        this.handleControl(event.data);
+      if (this.destroyed || this.ws !== ws) {
         return;
       }
-      this.handleBinary(new Uint8Array(event.data as ArrayBuffer));
+      if (typeof event.data === "string") {
+        this.handleControl(event.data, ws);
+        return;
+      }
+      this.handleBinary(new Uint8Array(event.data as ArrayBuffer), ws);
     };
     ws.onclose = (event) => {
-      if (this.ws === ws) {
-        this.ws = null;
+      if (this.ws !== ws) {
+        return;
       }
+      this.ws = null;
       this.synced = false;
       if (!this.shouldReconnect || this.destroyed || PERMANENT_CLOSE.has(event.code)) {
         return;
@@ -126,7 +148,42 @@ export class LiveClipProvider {
     };
   }
 
-  private handleControl(raw: string): void {
+  private dropSocket(): void {
+    const previous = this.ws;
+    this.ws = null;
+    this.synced = false;
+    if (!previous) {
+      return;
+    }
+    previous.onopen = null;
+    previous.onmessage = null;
+    previous.onclose = null;
+    previous.onerror = null;
+    try {
+      previous.close(1000, "reconnect");
+    } catch {
+      // already closed
+    }
+  }
+
+  private enqueuePending(update: Uint8Array): void {
+    this.pendingUpdates.push(update);
+    if (this.pendingUpdates.length > 32) {
+      this.pendingUpdates = [Y.mergeUpdates(this.pendingUpdates)];
+    }
+  }
+
+  private flushPending(ws: WebSocket): void {
+    if (this.pendingUpdates.length === 0 || ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    const pending = this.pendingUpdates;
+    this.pendingUpdates = [];
+    const payload = pending.length === 1 ? pending[0] : Y.mergeUpdates(pending);
+    ws.send(toSendBuffer(encodeSyncUpdate(payload)));
+  }
+
+  private handleControl(raw: string, ws: WebSocket): void {
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw) as unknown;
@@ -149,8 +206,8 @@ export class LiveClipProvider {
         this.onOnline(message.online);
       }
       this.onStatus("connected");
-      this.ws?.send(toSendBuffer(encodeSyncStep1(this.doc)));
-      this.ws?.send(toSendBuffer(encodeAwarenessFrom(this.awareness)));
+      ws.send(toSendBuffer(encodeSyncStep1(this.doc)));
+      ws.send(toSendBuffer(encodeAwarenessFrom(this.awareness)));
       return;
     }
     if (message.type === "presence" && typeof message.online === "number") {
@@ -166,16 +223,17 @@ export class LiveClipProvider {
     }
   }
 
-  private handleBinary(message: Uint8Array): void {
+  private handleBinary(message: Uint8Array, ws: WebSocket): void {
     const parsed = parseYjsMessage(message);
     if (parsed.kind === "sync-step1") {
-      this.ws?.send(toSendBuffer(encodeSyncStep2Reply(this.doc, parsed.decoder)));
+      ws.send(toSendBuffer(encodeSyncStep2Reply(this.doc, parsed.decoder)));
       return;
     }
     if (parsed.kind === "sync-payload") {
-      Y.applyUpdate(this.doc, parsed.update, "remote");
-      if (!this.synced) {
+      applyRemoteYjsUpdate(this.doc, parsed.update);
+      if (parsed.syncType === SYNC_STEP2 && !this.synced) {
         this.synced = true;
+        this.flushPending(ws);
         this.onStatus("saved");
       }
       return;

@@ -1,6 +1,7 @@
 import { SELF } from "cloudflare:test";
 import * as Y from "yjs";
-import { Y_TEXT_KEY } from "../../src/shared/protocol";
+import { SYNC_STEP2, Y_TEXT_KEY } from "../../src/shared/protocol";
+import { applyRemoteYjsUpdate, shouldSendYjsUpdate } from "../../src/shared/y-origin";
 import {
   encodeSyncStep1,
   encodeSyncStep2Reply,
@@ -55,29 +56,39 @@ export function sleep(ms: number): Promise<void> {
 }
 
 export class YjsTestClient {
-  readonly doc = new Y.Doc();
+  readonly doc: Y.Doc;
   readonly ws: WebSocket;
   readonly response: Response;
   role: string | null = null;
   online = 0;
   saved = 0;
+  synced = false;
   errors: string[] = [];
+  private pendingUpdates: Uint8Array[] = [];
+  private closed = false;
   private readonly ready: Promise<void>;
   private resolveReady: () => void = () => undefined;
 
-  constructor(ws: WebSocket, secret: string | null, response: Response) {
+  constructor(ws: WebSocket, secret: string | null, response: Response, doc = new Y.Doc()) {
+    this.doc = doc;
     this.ws = ws;
     this.response = response;
     this.ready = new Promise((resolve) => {
       this.resolveReady = resolve;
     });
     this.doc.on("update", (update, origin) => {
-      if (origin === "remote" || origin === "storage") {
+      if (this.closed || !shouldSendYjsUpdate(origin, true)) {
         return;
       }
-      if (this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(toSendBuffer(encodeSyncUpdate(update)));
+      if (this.ws.readyState !== WebSocket.OPEN || this.role === null || !this.synced) {
+        this.pendingUpdates.push(update);
+        return;
       }
+      this.ws.send(toSendBuffer(encodeSyncUpdate(update)));
+    });
+    this.ws.addEventListener("close", () => {
+      this.closed = true;
+      this.synced = false;
     });
     this.ws.addEventListener("message", (event) => {
       try {
@@ -91,6 +102,10 @@ export class YjsTestClient {
 
   get text(): string {
     return this.doc.getText(Y_TEXT_KEY).toString();
+  }
+
+  async waitSynced(timeoutMs = 8_000): Promise<void> {
+    await waitFor(() => this.synced, timeoutMs);
   }
 
   async waitReady(timeoutMs = 8_000): Promise<void> {
@@ -142,12 +157,30 @@ export class YjsTestClient {
       return;
     }
     if (parsed.kind === "sync-payload") {
-      Y.applyUpdate(this.doc, parsed.update, "remote");
+      applyRemoteYjsUpdate(this.doc, parsed.update);
+      if (parsed.syncType === SYNC_STEP2 && !this.synced) {
+        this.synced = true;
+        this.flushPending();
+      }
     }
+  }
+
+  private flushPending(): void {
+    if (this.pendingUpdates.length === 0 || this.ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+    const pending = this.pendingUpdates;
+    this.pendingUpdates = [];
+    const payload = pending.length === 1 ? pending[0] : Y.mergeUpdates(pending);
+    this.ws.send(toSendBuffer(encodeSyncUpdate(payload)));
   }
 }
 
-export async function connectClient(roomId: string, secret: string | null): Promise<YjsTestClient> {
+export async function connectClient(
+  roomId: string,
+  secret: string | null,
+  doc?: Y.Doc,
+): Promise<YjsTestClient> {
   const response = await openSocket(roomId);
   if (response.status !== 101 || !response.webSocket) {
     throw new Error(`websocket upgrade failed: ${response.status}`);
@@ -155,7 +188,8 @@ export async function connectClient(roomId: string, secret: string | null): Prom
   response.webSocket.accept();
   response.webSocket.binaryType = "arraybuffer";
   await sleep(0);
-  const client = new YjsTestClient(response.webSocket, secret, response);
+  const client = new YjsTestClient(response.webSocket, secret, response, doc);
   await client.waitReady();
+  await client.waitSynced();
   return client;
 }

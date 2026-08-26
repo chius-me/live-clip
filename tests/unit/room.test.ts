@@ -246,6 +246,57 @@ describe("Room Durable Object", () => {
     expect((await stub.getDebugState()).text).toBe(a.text);
   });
 
+  it("converges concurrent inserts at different indexes and a fresh reconnect socket", async () => {
+    const created = await createRoom();
+    const a = await connectClient(created.roomId, created.editSecret);
+    const b = await connectClient(created.roomId, created.editSecret);
+
+    a.insert(0, "aaaa");
+    await waitFor(() => a.text === "aaaa" && b.text === "aaaa");
+
+    a.insert(0, "1111");
+    b.insert(4, "2222");
+
+    await waitFor(
+      () =>
+        a.text === b.text &&
+        a.text.includes("1111") &&
+        a.text.includes("2222") &&
+        a.text.includes("aaaa"),
+    );
+    expect(a.text).toBe(b.text);
+    expect(a.text).toContain("1111");
+    expect(a.text).toContain("2222");
+    expect(a.text).toContain("aaaa");
+
+    a.ws.close(1000, "reconnect test");
+    const c = await connectClient(created.roomId, created.editSecret);
+    expect(c.doc).not.toBe(a.doc);
+    await waitFor(() => c.text === b.text);
+    expect(c.text).toBe(b.text);
+    expect(c.synced).toBe(true);
+    expect((await env.ROOMS.getByName(created.roomId).getDebugState()).text).toBe(b.text);
+  });
+
+  it("replays local edits made while disconnected on the same Y.Doc", async () => {
+    const created = await createRoom();
+    const a = await connectClient(created.roomId, created.editSecret);
+    const b = await connectClient(created.roomId, created.editSecret);
+    a.insert(0, "hello");
+    await waitFor(() => a.text === "hello" && b.text === "hello");
+
+    a.ws.close(1000, "offline");
+    await sleep(50);
+    a.insert(5, "!");
+    expect(a.text).toBe("hello!");
+
+    const a2 = await connectClient(created.roomId, created.editSecret, a.doc);
+    await waitFor(() => b.text === "hello!" && a2.text === "hello!");
+    expect(b.text).toBe("hello!");
+    expect(a2.text).toBe("hello!");
+    expect((await env.ROOMS.getByName(created.roomId).getDebugState()).text).toBe("hello!");
+  });
+
   it("ignores a raw Yjs update that never passed through server persist when unauthorized", async () => {
     const created = await createRoom();
     const rogueDoc = new Y.Doc();

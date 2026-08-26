@@ -14,6 +14,7 @@ import {
 } from "../shared/protocol";
 import { copyText, downloadText } from "./clipboard";
 import { installRemoteCursorStyles } from "./cursors";
+import { installEditorSyncGuard } from "./editor-sync";
 import { getOrCreateIdentity } from "./identity";
 import { monacoThemeName, registerClipThemes } from "./monaco-theme";
 import { LiveClipProvider, type ConnectionStatus } from "./provider";
@@ -24,6 +25,26 @@ const STATUS_LABEL: Record<ConnectionStatus, string> = {
   connected: "已连接",
   reconnecting: "正在重连",
   saved: "已保存",
+};
+
+const EDITOR_OPTIONS: MonacoEditor.IStandaloneEditorConstructionOptions = {
+  readOnly: true,
+  domReadOnly: true,
+  minimap: { enabled: false },
+  fontSize: 14,
+  wordWrap: "on",
+  automaticLayout: true,
+  scrollBeyondLastLine: false,
+  padding: { top: 8 },
+  renderLineHighlight: "all",
+  tabSize: 2,
+  insertSpaces: true,
+  detectIndentation: false,
+  formatOnType: false,
+  formatOnPaste: false,
+  autoClosingBrackets: "never",
+  autoClosingQuotes: "never",
+  unicodeHighlight: { ambiguousCharacters: false },
 };
 
 type Theme = "light" | "dark";
@@ -75,32 +96,99 @@ export function Pad({ roomId }: { roomId: string }) {
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
   const awarenessRef = useRef<Awareness | null>(null);
   const bindingRef = useRef<MonacoBinding | null>(null);
+  const boundEditorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+  const boundModelRef = useRef<MonacoEditor.ITextModel | null>(null);
+  const boundAwarenessRef = useRef<Awareness | null>(null);
+  const syncGuardRef = useRef<(() => void) | null>(null);
 
   const showToast = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(null), 2200);
   }, []);
 
+  const dropBinding = useCallback(() => {
+    syncGuardRef.current?.();
+    syncGuardRef.current = null;
+    bindingRef.current?.destroy();
+    bindingRef.current = null;
+    boundEditorRef.current = null;
+    boundModelRef.current = null;
+    boundAwarenessRef.current = null;
+  }, []);
+
   const bindEditor = useCallback(() => {
     const editor = editorRef.current;
     const awareness = awarenessRef.current;
+    const monaco = monacoRef.current;
     const model = editor?.getModel();
-    if (!editor || !awareness || !model) {
+    if (!editor || !awareness || !model || !monaco) {
       return;
     }
-    bindingRef.current?.destroy();
-    bindingRef.current = new MonacoBinding(ytext, model, new Set([editor]), awareness);
-  }, [ytext]);
+    if (
+      bindingRef.current &&
+      boundEditorRef.current === editor &&
+      boundModelRef.current === model &&
+      boundAwarenessRef.current === awareness
+    ) {
+      return;
+    }
+    dropBinding();
+    model.setEOL(monaco.editor.EndOfLineSequence.LF);
+    const binding = new MonacoBinding(ytext, model, new Set([editor]), awareness);
+    bindingRef.current = binding;
+    boundEditorRef.current = editor;
+    boundModelRef.current = model;
+    boundAwarenessRef.current = awareness;
+    syncGuardRef.current = installEditorSyncGuard({
+      editor,
+      ytext,
+      binding,
+      eol: monaco.editor.EndOfLineSequence.LF,
+    });
+  }, [dropBinding, ytext]);
 
   useEffect(() => {
     window.__LIVECLIP_TEXT = () => ytext.toString();
+    window.__LIVECLIP_MONACO = () => editorRef.current?.getModel()?.getValue() ?? "";
     window.__LIVECLIP_INSERT = (index, value) => {
       const at = Math.max(0, Math.min(index, ytext.length));
       ytext.insert(at, value);
     };
+    window.__LIVECLIP_FOCUS_OFFSET = (index) => {
+      const editor = editorRef.current;
+      const model = editor?.getModel();
+      if (!editor || !model) {
+        return;
+      }
+      const offset = Math.max(0, Math.min(index, model.getValueLength()));
+      const pos = model.getPositionAt(offset);
+      editor.setPosition(pos);
+      editor.revealPositionInCenterIfOutsideViewport(pos);
+      editor.focus();
+    };
+    window.__LIVECLIP_EXECUTE_EDIT = (index, value) => {
+      const editor = editorRef.current;
+      const monaco = monacoRef.current;
+      const model = editor?.getModel();
+      if (!editor || !monaco || !model) {
+        return;
+      }
+      const offset = Math.max(0, Math.min(index, model.getValueLength()));
+      const pos = model.getPositionAt(offset);
+      editor.executeEdits("liveclip-test", [
+        {
+          range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+          text: value,
+          forceMoveMarkers: true,
+        },
+      ]);
+    };
     return () => {
       delete window.__LIVECLIP_TEXT;
+      delete window.__LIVECLIP_MONACO;
       delete window.__LIVECLIP_INSERT;
+      delete window.__LIVECLIP_FOCUS_OFFSET;
+      delete window.__LIVECLIP_EXECUTE_EDIT;
     };
   }, [ytext]);
 
@@ -146,13 +234,12 @@ export function Pad({ roomId }: { roomId: string }) {
     return () => {
       ymeta.unobserve(onMeta);
       stopCursors();
-      bindingRef.current?.destroy();
-      bindingRef.current = null;
+      dropBinding();
       provider.destroy();
       awareness.destroy();
       awarenessRef.current = null;
     };
-  }, [bindEditor, doc, identity, roomId, showToast, ymeta]);
+  }, [bindEditor, doc, dropBinding, identity, roomId, showToast, ymeta]);
 
   useEffect(() => {
     editorRef.current?.updateOptions({
@@ -169,6 +256,7 @@ export function Pad({ roomId }: { roomId: string }) {
     const model = editor.getModel();
     if (model) {
       monaco.editor.setModelLanguage(model, language);
+      model.setEOL(monaco.editor.EndOfLineSequence.LF);
     }
     editor.updateOptions({ readOnly: role !== "editor", domReadOnly: role !== "editor" });
     bindEditor();
@@ -307,19 +395,7 @@ export function Pad({ roomId }: { roomId: string }) {
           defaultLanguage={DEFAULT_LANGUAGE}
           defaultValue=""
           onMount={onMount}
-          options={{
-            readOnly: !canEdit,
-            domReadOnly: !canEdit,
-            minimap: { enabled: false },
-            fontSize: 14,
-            wordWrap: "on",
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            padding: { top: 8 },
-            renderLineHighlight: "all",
-            tabSize: 2,
-            unicodeHighlight: { ambiguousCharacters: false },
-          }}
+          options={EDITOR_OPTIONS}
         />
       </div>
       {toast ? (
