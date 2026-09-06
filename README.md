@@ -15,7 +15,7 @@ Realtime collaborative clipboard on Cloudflare Workers.
 
 Open the same link on a computer and a phone, then edit plain text or code together. Updates sync with Yjs CRDT, so concurrent typing converges instead of overwriting.
 
-Live site: https://liveclip.chius.cc
+Live site: https://liveclip.chius.dev
 
 For save-then-share, use [Clip](https://clip.chius.cc/).
 
@@ -58,7 +58,7 @@ npx wrangler login
 npm run deploy
 ```
 
-Repo secrets: `CLOUDFLARE_API_TOKEN` (Edit Cloudflare Workers) and `CLOUDFLARE_ACCOUNT_ID`. The custom domain `liveclip.chius.cc` is already bound.
+Repo secrets: `CLOUDFLARE_API_TOKEN` (Edit Cloudflare Workers) and `CLOUDFLARE_ACCOUNT_ID`. The custom domain `liveclip.chius.dev` is already bound.
 
 Optional Turnstile: `wrangler secret put TURNSTILE_SECRET` and set `TURNSTILE_SITE_KEY`. Room creation skips Turnstile when it is unset.
 

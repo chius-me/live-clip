@@ -26,7 +26,7 @@
       "new_sqlite_classes": ["Room"],
     },
   ],
-  "routes": [{ "pattern": "liveclip.chius.cc", "custom_domain": true }],
+  "routes": [{ "pattern": "liveclip.chius.dev", "custom_domain": true }],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1,

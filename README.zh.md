@@ -15,7 +15,7 @@
 
 打开同一个链接，多台设备同时编辑纯文本或代码。修改用 Yjs CRDT 实时同步，不会互相覆盖。
 
-线上：https://liveclip.chius.cc
+线上：https://liveclip.chius.dev
 
 适合「打开就能写」。保存后再分享请用 [Clip](https://clip.chius.cc/)。
 
@@ -58,7 +58,7 @@ npx wrangler login
 npm run deploy
 ```
 
-仓库 Secrets：`CLOUDFLARE_API_TOKEN`（权限用 Edit Cloudflare Workers）、`CLOUDFLARE_ACCOUNT_ID`。自定义域已绑 `liveclip.chius.cc`。
+仓库 Secrets：`CLOUDFLARE_API_TOKEN`（权限用 Edit Cloudflare Workers）、`CLOUDFLARE_ACCOUNT_ID`。自定义域已绑 `liveclip.chius.dev`。
 
 可选 Turnstile：`wrangler secret put TURNSTILE_SECRET`，并设置 `TURNSTILE_SITE_KEY`。未配置时创建房间不验证。
 

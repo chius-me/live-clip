@@ -4,7 +4,7 @@
   "private": true,
   "license": "GPL-3.0-only",
   "description": "Cloudflare-only real-time collaborative clipboard (Yjs + Durable Objects)",
-  "homepage": "https://liveclip.chius.cc",
+  "homepage": "https://liveclip.chius.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chius-me/live-clip.git"
