@@ -2,7 +2,7 @@
   "name": "liveclip",
   "version": "1.0.0",
   "private": true,
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "description": "Cloudflare-only real-time collaborative clipboard (Yjs + Durable Objects)",
   "homepage": "https://liveclip.chius.dev",
   "repository": {

@@ -7,7 +7,7 @@
 Realtime collaborative clipboard on Cloudflare Workers.
 
 [![Release](https://img.shields.io/github/v/release/chius-me/live-clip?logo=github)](https://github.com/chius-me/live-clip/releases/latest)
-[![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
 
@@ -68,4 +68,4 @@ Plain text and code only. No accounts or history. Default cap is 1 MiB per docum
 
 ## License
 
-[GPL-3.0](LICENSE). The UI is inspired by [Rustpad](https://github.com/ekzhang/rustpad); none of its server code is copied.
+[MIT](LICENSE). The UI is inspired by [Rustpad](https://github.com/ekzhang/rustpad); none of its server code is copied.
