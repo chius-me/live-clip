@@ -6,10 +6,13 @@
 
 Realtime collaborative clipboard on Cloudflare Workers.
 
-[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?logo=github)](https://github.com/chius-me/live-clip/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?color=2ea44f)](https://github.com/chius-me/live-clip/releases/latest)
+[![CI](https://github.com/chius-me/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-me/live-clip/actions)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
+
+[Live Demo](https://liveclip.chius.dev) · [Issues](https://github.com/chius-me/live-clip/issues) · [Clip (Save & Share)](https://clip.chius.cc/)
 
 </div>
 
@@ -66,6 +69,12 @@ Optional Turnstile: `wrangler secret put TURNSTILE_SECRET` and set `TURNSTILE_SI
 
 Plain text and code only. No accounts or history. Default cap is 1 MiB per document and 50 connections per room. Anyone with the edit link can write. Durable Objects are billed by usage.
 
-## License
+## 📄 License
 
-[MIT](LICENSE). The UI is inspired by [Rustpad](https://github.com/ekzhang/rustpad); none of its server code is copied.
+Distributed under the [MIT](LICENSE) License. The UI is inspired by [Rustpad](https://github.com/ekzhang/rustpad); none of its server code is copied.
+
+---
+
+<div align="center">
+  <sub>Crafted with ❤️ by <a href="https://chius.cc">Chius</a> · Powered by Cloudflare & GitHub</sub>
+</div>

@@ -6,10 +6,13 @@
 
 运行在 Cloudflare Workers 上的实时协作剪切板。
 
-[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?logo=github)](https://github.com/chius-me/live-clip/releases/latest)
-[![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?color=2ea44f)](https://github.com/chius-me/live-clip/releases/latest)
+[![CI](https://github.com/chius-me/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-me/live-clip/actions)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
+
+[在线演示](https://liveclip.chius.dev) · [问题反馈](https://github.com/chius-me/live-clip/issues) · [Clip (保存并分享)](https://clip.chius.cc/)
 
 </div>
 
@@ -66,6 +69,12 @@ npm run deploy
 
 纯文本 / 代码，无账号与历史。单文档默认 1 MiB，单房间 50 连接。知道编辑链接的人都能写。Durable Objects 按用量计费。
 
-## 许可
+## 📄 许可证
 
-[GPL-3.0](LICENSE)。界面参考了 [Rustpad](https://github.com/ekzhang/rustpad) 的交互，未复制其服务端代码。
+本项目采用 [MIT 许可证](LICENSE) 开源发布。界面参考了 [Rustpad](https://github.com/ekzhang/rustpad) 的交互，未复制其服务端代码。
+
+---
+
+<div align="center">
+  <sub>Crafted with ❤️ by <a href="https://chius.cc">Chius</a> · Powered by Cloudflare & GitHub</sub>
+</div>
