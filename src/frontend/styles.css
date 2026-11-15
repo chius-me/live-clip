@@ -22,8 +22,7 @@
   --warn: #c77826;
   --danger: #b24c37;
   --radius: 2px;
-  --font:
-    "Google Sans Code", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font: "Google Sans Code", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --font-mono:
     "Google Sans Code", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
