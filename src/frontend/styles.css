@@ -1,39 +1,47 @@
+@font-face {
+  font-family: "Google Sans Code";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("/fonts/google-sans-code.woff2") format("woff2");
+}
+
 :root,
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #d8d5ce;
-  --panel: #e8e6df;
-  --muted-bg: #ccc9c1;
-  --text: #161615;
-  --text-secondary: #3a3936;
-  --muted: #6a6862;
-  --line: #9e9a90;
-  --accent: #8d5a2b;
-  --accent-ink: #f0eee8;
-  --ok: #3f5c38;
-  --warn: #8d5a2b;
-  --danger: #8c2f2f;
+  --bg: #fdfcfb;
+  --panel: #f2f1ee;
+  --muted-bg: #e5e4e1;
+  --text: #292c30;
+  --text-secondary: #4a4f56;
+  --muted: #6b7076;
+  --line: #e5e4e1;
+  --accent: #b24c37;
+  --accent-ink: #fdfcfb;
+  --ok: #2a8556;
+  --warn: #c77826;
+  --danger: #b24c37;
   --radius: 2px;
   --font:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei",
-    sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    "Google Sans Code", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-mono:
+    "Google Sans Code", "Sarasa Mono SC", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #121211;
-  --panel: #1c1c1a;
-  --muted-bg: #2a2a26;
-  --text: #e8e6df;
-  --text-secondary: #b8b5ac;
-  --muted: #7a776f;
-  --line: #3f3e39;
-  --accent: #8d5a2b;
-  --accent-ink: #f0eee8;
-  --ok: #9aaa7a;
-  --warn: #c4a574;
-  --danger: #c45c4a;
+  --bg: #202530;
+  --panel: #252c38;
+  --muted-bg: #2a303c;
+  --text: #e1e5ed;
+  --text-secondary: #a4adbb;
+  --muted: #a4adbb;
+  --line: #3c4350;
+  --accent: #eab38b;
+  --accent-ink: #202530;
+  --ok: #48a976;
+  --warn: #eab38b;
+  --danger: #ffb3b8;
 }
 
 * {
@@ -58,6 +66,26 @@ body,
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("/images/paper-grain.svg");
+  opacity: 0.045;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] body::before {
+  opacity: 0.025;
+  filter: invert(1);
 }
 
 .app {
