@@ -43,8 +43,17 @@ export function jsonResponse(body: unknown, status = 200, extra?: HeadersInit): 
   return new Response(JSON.stringify(body), { status, headers });
 }
 
-export function htmlResponse(body: string, status = 200): Response {
+export function htmlResponse(body: string, status = 200, nonce?: string): Response {
   const headers = new Headers(SECURITY_HEADERS);
+  if (nonce) {
+    headers.set(
+      "Content-Security-Policy",
+      SECURITY_HEADERS["Content-Security-Policy"].replace(
+        "script-src 'self'",
+        `script-src 'self' 'nonce-${nonce}'`,
+      ),
+    );
+  }
   headers.set("Content-Type", "text/html; charset=utf-8");
   return new Response(body, { status, headers });
 }

@@ -21,7 +21,7 @@ function turnstileSecret(env: Env): string | undefined {
   return extra.TURNSTILE_SECRET || undefined;
 }
 
-function turnstilePage(siteKey: string): string {
+function turnstilePage(siteKey: string, nonce: string): string {
   const escaped = siteKey.replace(/"/g, "&quot;");
   return `<!doctype html>
 <html lang="zh-CN">
@@ -48,7 +48,7 @@ function turnstilePage(siteKey: string): string {
       </form>
       <p id="err" hidden></p>
     </main>
-    <script>
+    <script nonce="${nonce}">
       const form = document.getElementById("form");
       const err = document.getElementById("err");
       form.addEventListener("submit", async (event) => {
@@ -113,7 +113,8 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
 
   if (url.pathname === "/" && request.method === "GET") {
     if (turnstileSecret(env) && env.TURNSTILE_SITE_KEY) {
-      return htmlResponse(turnstilePage(env.TURNSTILE_SITE_KEY));
+      const nonce = crypto.randomUUID().replace(/-/g, "");
+      return htmlResponse(turnstilePage(env.TURNSTILE_SITE_KEY, nonce), 200, nonce);
     }
     const created = await handleCreate(request, env);
     if (created instanceof Response) {
