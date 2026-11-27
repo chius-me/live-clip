@@ -7,12 +7,12 @@
 Realtime collaborative clipboard on Cloudflare Workers.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/chius-me/live-clip?color=2ea44f)](https://github.com/chius-me/live-clip/releases/latest)
-[![CI](https://github.com/chius-me/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-me/live-clip/actions)
+[![Release](https://img.shields.io/github/v/release/chius-n/live-clip?color=2ea44f)](https://github.com/chius-n/live-clip/releases/latest)
+[![CI](https://github.com/chius-n/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-n/live-clip/actions)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
 
-[Live Demo](https://liveclip.chius.dev) · [Issues](https://github.com/chius-me/live-clip/issues) · [Clip (Save & Share)](https://clip.chius.cc/)
+[Live Demo](https://liveclip.chius.dev) · [Issues](https://github.com/chius-n/live-clip/issues) · [Clip (Save & Share)](https://clip.chius.cc/)
 
 </div>
 

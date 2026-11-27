@@ -7,10 +7,10 @@
   "homepage": "https://liveclip.chius.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chius-me/live-clip.git"
+    "url": "git+https://github.com/chius-n/live-clip.git"
   },
   "bugs": {
-    "url": "https://github.com/chius-me/live-clip/issues"
+    "url": "https://github.com/chius-n/live-clip/issues"
   },
   "type": "module",
   "engines": {
