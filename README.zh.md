@@ -7,12 +7,12 @@
 运行在 Cloudflare Workers 上的实时协作剪切板。
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/chius-n/live-clip?color=2ea44f)](https://github.com/chius-n/live-clip/releases/latest)
-[![CI](https://github.com/chius-n/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-n/live-clip/actions)
+[![Release](https://img.shields.io/github/v/release/chius-cc/live-clip?color=2ea44f)](https://github.com/chius-cc/live-clip/releases/latest)
+[![CI](https://github.com/chius-cc/live-clip/actions/workflows/deploy.yml/badge.svg)](https://github.com/chius-cc/live-clip/actions)
 ![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020?logo=cloudflare&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
 
-[在线演示](https://liveclip.chius.dev) · [问题反馈](https://github.com/chius-n/live-clip/issues) · [Clip (保存并分享)](https://clip.chius.cc/)
+[在线演示](https://liveclip.chius.dev) · [问题反馈](https://github.com/chius-cc/live-clip/issues) · [Clip (保存并分享)](https://clip.chius.cc/)
 
 </div>
 
